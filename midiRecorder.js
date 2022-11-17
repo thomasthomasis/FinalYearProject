@@ -1,16 +1,22 @@
-// Enable WEBMIDI.js and trigger the onEnabled() function when ready
-WebMidi.enable().then(onEnabled).catch(err => alert(err));
+var notes = document.querySelector(".notes-played"); 
 
-// Function triggered when WEBMIDI.js is ready
-function onEnabled() {
+WebMidi.enable(function () {
+  //console.log(WebMidi.inputs);
+  //console.log(WebMidi.outputs);
 
-// Display available MIDI input devices
-if (WebMidi.inputs.length < 1) {
-  document.body.innerHTML+= "No device detected.";
-} else {
-  WebMidi.inputs.forEach((device, index) => {
-    document.body.innerHTML+= `${index}: ${device.name} <br>`;
-  });
-}
+  //console.log(WebMidi);
 
-}
+  var input = WebMidi.inputs[0];
+  console.log(input);
+
+  if(input)
+  {
+    input.addListener('noteon', 'all',
+        function (e) {
+            console.log("(" + e.note.name + e.note.octave + ")");
+            notes.innerHTML += "(" + e.note.name + e.note.octave + ")";
+        }
+    );
+  }
+  
+});
