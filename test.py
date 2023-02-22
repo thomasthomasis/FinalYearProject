@@ -7,9 +7,8 @@ import pandas as pd
 import pretty_midi
 import seaborn as sns
 import tensorflow as tf
-#import plotext as plt
+import os
 
-from os.path import exists
 from IPython import display
 from matplotlib import pyplot as plt
 from typing import Dict, List, Optional, Sequence, Tuple
@@ -21,42 +20,10 @@ np.random.seed(seed)
 # Sampling rate for audio playback
 _SAMPLING_RATE = 16000
 
-data_dir = pathlib.Path('data/maestro-v2.0.0')
-if not data_dir.exists():
-  tf.keras.utils.get_file(
-      'maestro-v2.0.0-midi.zip',
-      origin='https://storage.googleapis.com/magentadata/datasets/maestro/v2.0.0/maestro-v2.0.0-midi.zip',
-      extract=True,
-      cache_dir='.', cache_subdir='data',
-  )
+data_dir = pathlib.Path('MIDI_files')
 
 filenames = glob.glob(str(data_dir/'**/*.mid*'))
 print('Number of files:', len(filenames))
-
-sample_file = filenames[1]
-print(sample_file)
-
-pm = pretty_midi.PrettyMIDI(sample_file)
-
-#not needed for this to work
-def display_audio(pm: pretty_midi.PrettyMIDI, seconds=30):
-  waveform = pm.fluidsynth(fs=_SAMPLING_RATE)
-  # Take a sample of the generated waveform to mitigate kernel resets
-  waveform_short = waveform[:seconds*_SAMPLING_RATE]
-  return display.Audio(waveform_short, rate=_SAMPLING_RATE)
-
-#display_audio(pm)
-
-print('Number of instruments:', len(pm.instruments))
-instrument = pm.instruments[0]
-instrument_name = pretty_midi.program_to_instrument_name(instrument.program)
-print('Instrument name:', instrument_name)
-
-for i, note in enumerate(instrument.notes[:10]):
-  note_name = pretty_midi.note_number_to_name(note.pitch)
-  duration = note.end - note.start
-  print(f'{i}: pitch={note.pitch}, note_name={note_name},'
-        f' duration={duration:.4f}')
   
 def midi_to_notes(midi_file: str) -> pd.DataFrame:
   pm = pretty_midi.PrettyMIDI(midi_file)
@@ -79,13 +46,6 @@ def midi_to_notes(midi_file: str) -> pd.DataFrame:
 
   return pd.DataFrame({name: np.array(value) for name, value in notes.items()})
 
-raw_notes = midi_to_notes(sample_file)
-raw_notes.head()
-
-get_note_names = np.vectorize(pretty_midi.note_number_to_name)
-sample_note_names = get_note_names(raw_notes['pitch'])
-sample_note_names[:10]
-
 def notes_to_midi(notes: pd.DataFrame, out_file: str, instrument_name: str,velocity: int = 100,) -> pretty_midi.PrettyMIDI:
   pm = pretty_midi.PrettyMIDI()
   instrument = pretty_midi.Instrument(program=pretty_midi.instrument_name_to_program(instrument_name))
@@ -94,12 +54,7 @@ def notes_to_midi(notes: pd.DataFrame, out_file: str, instrument_name: str,veloc
   for i, note in notes.iterrows():
     start = float(prev_start + note['step'])
     end = float(start + note['duration'])
-    note = pretty_midi.Note(
-        velocity=velocity,
-        pitch=int(note['pitch']),
-        start=start,
-        end=end,
-    )
+    note = pretty_midi.Note(velocity=velocity, pitch=int(note['pitch']), start=start, end=end,)
     instrument.notes.append(note)
     prev_start = start
 
@@ -107,16 +62,6 @@ def notes_to_midi(notes: pd.DataFrame, out_file: str, instrument_name: str,veloc
   pm.write(out_file)
   return pm
 
-example_file = 'example0.midi'
-for i in range (1000):
-  file_exists = exists("D:\The God Folder\Github\FinalYearProject\example" + str(i) + ".midi")
-  if(file_exists):
-    example_file = 'example' + str(i) + '.midi'
-  
-  else:
-    break
-
-example_pm = notes_to_midi(raw_notes, out_file=example_file, instrument_name=instrument_name)
 
 num_files = 5
 all_notes = []
@@ -135,17 +80,12 @@ train_notes = np.stack([all_notes[key] for key in key_order], axis=1)
 notes_ds = tf.data.Dataset.from_tensor_slices(train_notes)
 notes_ds.element_spec
 
-def create_sequences(
-    dataset: tf.data.Dataset, 
-    seq_length: int,
-    vocab_size = 128,
-) -> tf.data.Dataset:
+def create_sequences(dataset: tf.data.Dataset, seq_length: int, vocab_size = 128,) -> tf.data.Dataset:
   """Returns TF Dataset of sequence and label examples."""
   seq_length = seq_length+1
 
   # Take 1 extra for the labels
-  windows = dataset.window(seq_length, shift=1, stride=1,
-                              drop_remainder=True)
+  windows = dataset.window(seq_length, shift=1, stride=1, drop_remainder=True)
 
   # `flat_map` flattens the" dataset of datasets" into a dataset of tensors
   flatten = lambda x: x.batch(seq_length, drop_remainder=True)
@@ -313,4 +253,3 @@ generated_notes = pd.DataFrame(
 out_file = 'output.mid'
 out_pm = notes_to_midi(
     generated_notes, out_file=out_file, instrument_name=instrument_name)
-#display_audio(out_pm)
