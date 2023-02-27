@@ -13,6 +13,7 @@ from IPython import display
 from matplotlib import pyplot as plt
 from typing import Dict, List, Optional, Sequence, Tuple
 
+#----
 seed = 42
 tf.random.set_seed(seed)
 np.random.seed(seed)
@@ -20,10 +21,21 @@ np.random.seed(seed)
 # Sampling rate for audio playback
 _SAMPLING_RATE = 16000
 
-data_dir = pathlib.Path('MIDI_files')
+data_dir = pathlib.Path('testing_data')
 
-filenames = glob.glob(str(data_dir/'**/*.mid*'))
+filenames = glob.glob(str(data_dir/'*.mid*'))
 print('Number of files:', len(filenames))
+
+sample_file = filenames[1]
+print(sample_file)
+
+pm = pretty_midi.PrettyMIDI(sample_file)
+
+print('Number of instruments:', len(pm.instruments))
+instrument = pm.instruments[0]
+instrument_name = pretty_midi.program_to_instrument_name(instrument.program)
+print('Instrument name:', instrument_name)
+#----
   
 def midi_to_notes(midi_file: str) -> pd.DataFrame:
   pm = pretty_midi.PrettyMIDI(midi_file)
@@ -46,6 +58,10 @@ def midi_to_notes(midi_file: str) -> pd.DataFrame:
 
   return pd.DataFrame({name: np.array(value) for name, value in notes.items()})
 
+#----
+raw_notes = midi_to_notes(sample_file)
+#----
+
 def notes_to_midi(notes: pd.DataFrame, out_file: str, instrument_name: str,velocity: int = 100,) -> pretty_midi.PrettyMIDI:
   pm = pretty_midi.PrettyMIDI()
   instrument = pretty_midi.Instrument(program=pretty_midi.instrument_name_to_program(instrument_name))
@@ -63,7 +79,8 @@ def notes_to_midi(notes: pd.DataFrame, out_file: str, instrument_name: str,veloc
   return pm
 
 
-num_files = 5
+#----
+num_files = len(filenames)
 all_notes = []
 for f in filenames[:num_files]:
   notes = midi_to_notes(f)
@@ -79,6 +96,7 @@ train_notes = np.stack([all_notes[key] for key in key_order], axis=1)
 
 notes_ds = tf.data.Dataset.from_tensor_slices(train_notes)
 notes_ds.element_spec
+#----
 
 def create_sequences(dataset: tf.data.Dataset, seq_length: int, vocab_size = 128,) -> tf.data.Dataset:
   """Returns TF Dataset of sequence and label examples."""
@@ -106,7 +124,8 @@ def create_sequences(dataset: tf.data.Dataset, seq_length: int, vocab_size = 128
 
   return sequences.map(split_labels, num_parallel_calls=tf.data.AUTOTUNE)
 
-seq_length = 25
+#----
+seq_length = 10
 vocab_size = 128
 seq_ds = create_sequences(notes_ds, seq_length, vocab_size)
 seq_ds.element_spec
@@ -119,14 +138,10 @@ for seq, target in seq_ds.take(1):
 
 batch_size = 64
 buffer_size = n_notes - seq_length  # the number of items in the dataset
-train_ds = (seq_ds
-            .shuffle(buffer_size)
-            .batch(batch_size, drop_remainder=True)
-            .cache()
-            .prefetch(tf.data.experimental.AUTOTUNE))
+train_ds = (seq_ds.shuffle(buffer_size).batch(batch_size, drop_remainder=True).cache().prefetch(tf.data.experimental.AUTOTUNE))
 
 train_ds.element_spec
-
+#----
 
 def mse_with_positive_pressure(y_true: tf.Tensor, y_pred: tf.Tensor):
   mse = (y_true - y_pred) ** 2
@@ -148,8 +163,7 @@ outputs = {
 model = tf.keras.Model(inputs, outputs)
 
 loss = {
-      'pitch': tf.keras.losses.SparseCategoricalCrossentropy(
-          from_logits=True),
+      'pitch': tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
       'step': mse_with_positive_pressure,
       'duration': mse_with_positive_pressure,
 }
@@ -194,13 +208,7 @@ history = model.fit(
     callbacks=callbacks,
 )
 
-plt.plot(history.epoch, history.history['loss'], label='total loss')
-plt.show()
-
-def predict_next_note(
-    notes: np.ndarray, 
-    keras_model: tf.keras.Model, 
-    temperature: float = 1.0) -> int:
+def predict_next_note(notes: np.ndarray, keras_model: tf.keras.Model, temperature: float = 1.0) -> int:
   """Generates a note IDs using a trained sequence model."""
 
   assert temperature > 0
@@ -232,8 +240,7 @@ sample_notes = np.stack([raw_notes[key] for key in key_order], axis=1)
 
 # The initial sequence of notes; pitch is normalized similar to training
 # sequences
-input_notes = (
-    sample_notes[:seq_length] / np.array([vocab_size, 1, 1]))
+input_notes = (sample_notes[:seq_length] / np.array([vocab_size, 1, 1]))
 
 generated_notes = []
 prev_start = 0
@@ -247,9 +254,7 @@ for _ in range(num_predictions):
   input_notes = np.append(input_notes, np.expand_dims(input_note, 0), axis=0)
   prev_start = start
 
-generated_notes = pd.DataFrame(
-    generated_notes, columns=(*key_order, 'start', 'end'))
+generated_notes = pd.DataFrame(generated_notes, columns=(*key_order, 'start', 'end'))
 
 out_file = 'output.mid'
-out_pm = notes_to_midi(
-    generated_notes, out_file=out_file, instrument_name=instrument_name)
+out_pm = notes_to_midi(generated_notes, out_file=out_file, instrument_name=instrument_name)
