@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css"> 
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+    </head>
+
+    <body>
+        <div class="modal-container">
+            <div class="modal">
+                This is test text. This will eventually explain how the website works and some of its backstory
+            </div>
+        </div>
+
+        <div class="blur"></div>
+
+
+        <div class="header">
+            <h1>MIDI NET</h1>
+            <div class="info">i</div>
+        </div>
+
+        <div class="container-piano-roll">
+
+        </div>  
+        
+        <div class="container-clickables"> 
+            <div class="container-buttons">
+                <div class="generate">G</div>
+                <div class="undo">U</div>
+                <div class="clear">C</div>
+            </div>
+
+            <div class="container-slider">
+                <div class="slider-one">
+                    <p>Notes Generated: <span class="value">1</span></p>
+                    <input type="range" min="1" max="50" value="1" class="slider" id="myRange">
+                </div>
+            </div>
+            
+        </div>
+    </body>
+
+
+    <script src="midiRecorder.js"></script>
+</html>
