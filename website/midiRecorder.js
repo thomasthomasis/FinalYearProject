@@ -45,3 +45,26 @@ modalContainer.addEventListener("click", () => {
   blurCover.style.opacity = 0;
   blurCover.style.zIndex = -1;
 });
+
+
+const columns = document.querySelectorAll(".column");
+
+const noteClicked = e => {
+  console.log(e.target.id);
+
+  if(e.target.getAttribute("data-is-clicked") == "false")
+  {
+    e.target.setAttribute("data-is-clicked", "true");
+  }
+  else
+  {
+    e.target.setAttribute("data-is-clicked", "false");
+  }
+  
+}
+
+for(let column of columns)
+{
+  column.addEventListener("click", noteClicked)
+}
+
