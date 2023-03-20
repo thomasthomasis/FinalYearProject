@@ -206,7 +206,7 @@ def predict_next_note(notes: np.ndarray, keras_model: keras.Model, temperature: 
   assert temperature > 0
 
   # Add batch dimension
-  inputs = tf.expand_dims(notes, 0)
+  inputs = expand_dims(notes, 0)
 
   predictions = model.predict(inputs)
   pitch_logits = predictions['pitch']

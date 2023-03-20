@@ -1,9 +1,18 @@
 const slider = document.querySelector(".slider");
 const sliderValue = document.querySelector(".value");
 
+const speedSlider = document.querySelector(".speedSlider");
+const speedSliderValue = document.querySelector(".speedValue")
+
+
 slider.addEventListener("input", () => {
   sliderValue.innerHTML = slider.value;
 });
+
+speedSlider.addEventListener("input", () => {
+  speedSliderValue.innerHTML = speedSlider.value;
+})
+
 
 var pianoRoll = document.querySelector(".piano-roll");
 var generateButton = document.querySelector(".generate");
@@ -368,7 +377,9 @@ function play()
   }
   
   iteration++;
-  playTimeout = window.setTimeout(play, 750);
+
+  var speed = speedSlider.value;
+  playTimeout = window.setTimeout(play, speed);
 }
 
 function addColumns(numColumns)
