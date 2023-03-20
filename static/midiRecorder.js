@@ -145,7 +145,10 @@ const noteClicked = e => {
     }, 3000)
     */
 
-    var sound = new Audio(noteSounds[row - 24] + ".mp3");
+    const audioObject = document.getElementById(noteSounds[row - 24]);
+    console.log(audioObject);
+
+    var sound = new Audio(audioObject.src);
     sound.play();
   }
   else
