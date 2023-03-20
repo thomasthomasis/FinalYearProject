@@ -1,18 +1,11 @@
 import collections
-import datetime
 import glob
 import numpy as np
 import pathlib
 import pandas as pd
 import pretty_midi
-import seaborn as sns
 import tensorflow as tf
-from tensorflow import keras
 import os
-
-from IPython import display
-from matplotlib import pyplot as plt
-from typing import Dict, List, Optional, Sequence, Tuple
 
 seed = 42
 tf.random.set_seed(seed)

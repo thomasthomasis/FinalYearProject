@@ -1,5 +1,4 @@
-from flask import Flask, request, jsonify, Response, render_template
-import json
+from flask import Flask, request, jsonify, render_template
 from generate_notes import create_array_of_generated_notes
 
 app = Flask(__name__)
