@@ -4,12 +4,20 @@ import numpy as np
 import pathlib
 import pandas as pd
 import pretty_midi
-import tensorflow as tf
+from tensorflow import random
+from tensorflow import data
+from tensorflow import Tensor
+from tensorflow import maximum
+from tensorflow import reduce_mean
+from tensorflow import keras
+from tensorflow import squeeze
+from tensorflow import expand_dims
+from tensorflow import train
 import os
 from midiutil import MIDIFile
 
 seed = 42
-tf.random.set_seed(seed)
+random.set_seed(seed)
 np.random.seed(seed)
 
 #loading model with up to date weights
@@ -19,34 +27,34 @@ vocab_size = 128
 input_shape = (seq_length, 3)
 learning_rate = 0.005
 
-inputs = tf.keras.Input(input_shape)
-x = tf.keras.layers.LSTM(128)(inputs)
+inputs = keras.Input(input_shape)
+x = keras.layers.LSTM(128)(inputs)
 
 outputs = {
-  'pitch': tf.keras.layers.Dense(128, name='pitch')(x),
-  'step': tf.keras.layers.Dense(1, name='step')(x),
-  'duration': tf.keras.layers.Dense(1, name='duration')(x),
+  'pitch': keras.layers.Dense(128, name='pitch')(x),
+  'step': keras.layers.Dense(1, name='step')(x),
+  'duration': keras.layers.Dense(1, name='duration')(x),
 }
 
-model = tf.keras.Model(inputs, outputs)
+model = keras.Model(inputs, outputs)
 
-def mse_with_positive_pressure(y_true: tf.Tensor, y_pred: tf.Tensor):
+def mse_with_positive_pressure(y_true: Tensor, y_pred: Tensor):
   mse = (y_true - y_pred) ** 2
-  positive_pressure = 10 * tf.maximum(-y_pred, 0.0)
-  return tf.reduce_mean(mse + positive_pressure)
+  positive_pressure = 10 * maximum(-y_pred, 0.0)
+  return reduce_mean(mse + positive_pressure)
 
 loss = {
-      'pitch': tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+      'pitch': keras.losses.SparseCategoricalCrossentropy(from_logits=True),
       'step': mse_with_positive_pressure,
       'duration': mse_with_positive_pressure,
 }
 
-optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+optimizer = keras.optimizers.Adam(learning_rate=learning_rate)
 
 checkpoint_path = "training/cp-{epoch:04d}.ckpt"
 checkpoint_dir = os.path.dirname(checkpoint_path)
 
-latest = tf.train.latest_checkpoint(checkpoint_dir)
+latest = train.latest_checkpoint(checkpoint_dir)
 
 model.compile(loss=loss, optimizer=optimizer)
 model.load_weights(latest)
@@ -54,12 +62,12 @@ model.summary()
 
 #----------------------------------------
 
-def predict_next_note(notes: np.ndarray, keras_model: tf.keras.Model, temperature: float = 1.0) -> int:
+def predict_next_note(notes: np.ndarray, keras_model: keras.Model, temperature: float = 1.0) -> int:
 
   assert temperature > 0
 
   # Add batch dimension
-  inputs = tf.expand_dims(notes, 0)
+  inputs = expand_dims(notes, 0)
 
   predictions = model.predict(inputs)
   pitch_logits = predictions['pitch']
@@ -67,14 +75,14 @@ def predict_next_note(notes: np.ndarray, keras_model: tf.keras.Model, temperatur
   duration = predictions['duration']
 
   pitch_logits /= temperature
-  pitch = tf.random.categorical(pitch_logits, num_samples=1)
-  pitch = tf.squeeze(pitch, axis=-1)
-  duration = tf.squeeze(duration, axis=-1)
-  step = tf.squeeze(step, axis=-1)
+  pitch = random.categorical(pitch_logits, num_samples=1)
+  pitch = squeeze(pitch, axis=-1)
+  duration = squeeze(duration, axis=-1)
+  step = squeeze(step, axis=-1)
 
   # `step` and `duration` values should be non-negative
-  step = tf.maximum(0, step)
-  duration = tf.maximum(0, duration)
+  step = maximum(0, step)
+  duration = maximum(0, duration)
 
   return int(pitch), float(step), float(duration)
 

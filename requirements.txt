@@ -1,10 +1,6 @@
 Flask==2.2.3
-ipython==8.5.0
-matplotlib==3.6.0
+keras==2.11.0
 MIDIUtil==1.2.1
 numpy==1.23.3
 pandas==1.5.0
 pretty-midi==0.2.9
-seaborn==0.12.2
-tensorflow==2.12.0rc0
-Werkzeug==2.2.2
