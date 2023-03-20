@@ -132,6 +132,7 @@ const noteClicked = e => {
 
     var row = (parseInt(e.target.getAttribute("data-row")));
 
+    /*
     const audioObject = document.getElementById(noteSounds[row - 24]);
     const copy = audioObject.cloneNode(true);
     copy.classList.add("duplicate");
@@ -142,6 +143,10 @@ const noteClicked = e => {
     window.setInterval(() => {
       copy.remove();
     }, 3000)
+    */
+
+    var sound = new Audio(noteSounds[row - 24] + ".mp3");
+    sound.play();
   }
   else
   {
