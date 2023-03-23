@@ -37,7 +37,15 @@ container.addEventListener("scroll", () => {
 })
 
 generateButton.addEventListener("click", () => {
-  generate();
+  if(notesActive < 10)
+  {
+    alert("There needs to be 10 notes on the piano roll to generate notes");
+  }
+  else
+  {
+    generate();
+  }
+  
 });
 
 clearButton.addEventListener("click", () => {
@@ -125,10 +133,10 @@ var noteSounds = notes.reverse();
 var notesActive = 0;
 
 const noteClicked = e => {
-  console.log("Column Clicked: ", e.target.id);
+  //console.log("Column Clicked: ", e.target.id);
 
   var columnAmount = document.querySelectorAll(".row")[0].children[document.querySelectorAll(".row")[0].children.length - 1].id;
-  console.log("Column Amount: ", columnAmount);
+  //console.log("Column Amount: ", columnAmount);
 
   if(e.target.getAttribute("data-is-clicked") == "false")
   {
@@ -155,7 +163,7 @@ const noteClicked = e => {
     */
 
     const audioObject = document.getElementById(noteSounds[row - 24]);
-    console.log(audioObject);
+    //console.log(audioObject);
 
     var sound = new Audio(audioObject.src);
     sound.play();
@@ -192,20 +200,28 @@ function clear()
 
 function generate()
 {
-  const clickedNotes = document.querySelectorAll('[data-is-clicked="true"]');
+  var clickedNotes = document.querySelectorAll('[data-is-clicked="true"]');
+  var array = Array.prototype.slice.call(clickedNotes);
+  var clickedNotesArray = array.sort(function(a, b) {
+    //Comparing for strings instead of numbers
+    var idOne = parseInt(a.id);
+    var idTwo = parseInt(b.id);
+    
+    return idOne - idTwo;
+  });
+  //console.log(clickedNotesArray);
+
   var notesColumn = [];
   var notesRow = [];
-  for(var i = 0; i < clickedNotes.length; i++)
+
+  for(var i = 0; i < clickedNotesArray.length; i++)
   {
-    notesColumn.push(parseInt(clickedNotes[i].id));
-    notesRow.push(parseInt(clickedNotes[i].getAttribute("data-row")));
+    notesColumn.push(parseInt(clickedNotesArray[i].id));
+    notesRow.push(parseInt(clickedNotesArray[i].getAttribute("data-row")) - 12);
   }
-
-  notesRow = notesRow.reverse();
-  notesColumn.sort(function(a, b){return a - b});
-
-  console.log(notesColumn);
-  console.log(notesRow);
+ 
+  //console.log(notesColumn);
+  //console.log(notesRow);
 
   var numNotes = document.getElementById("myRange").value;
 
@@ -225,7 +241,7 @@ function generate()
     dataType: 'json',
     success: function(response)
     {
-      console.log(response);
+      //console.log(response);
       returnedData = response;
 
       loadGeneratedNotes(returnedData);
@@ -238,55 +254,56 @@ function generate()
 function loadGeneratedNotes(notes)
 {
   pitch = [];
-  startTimes = [];
 
   for(var i = 0; i < notes.length; i++)
   {
-    pitch.push(parseInt(notes[i][0]) - 36);
-  }
-
-  for(var i = 0; i < notes.length; i++)
-  {
-    startTimes.push(parseFloat(notes[i][3]));
+    pitch.push(parseInt(notes[i][0]));
   }
 
   var clickedNotes = document.querySelectorAll('[data-is-clicked="true"]');
   var maxColumn = 0;
 
-  console.log(clickedNotes);
+  //console.log(clickedNotes);
  
   for(var i = 0; i < clickedNotes.length; i++)
   {
     if(parseInt(clickedNotes[i].id) > maxColumn)
     {
       maxColumn = parseInt(clickedNotes[i].id);
-      console.log(maxColumn);
+      //console.log(maxColumn);
     }
   }
 
-  startTime = parseInt(maxColumn);
-  for(var i = 0; i < startTimes.length; i++)
-  {
-    startTimes[i] += startTime;
-  }
+  startTime = parseInt(maxColumn) + 1;
+  console.log(startTime);
 
-  console.log(startTimes);
-
-  var noteRows = document.querySelectorAll(".row");
+  console.log(pitch);
   for(var i = 0; i < pitch.length; i++)
   {
     if(pitch[i] < 0)
     {
       pitch[i] = 0;
     }
-    console.log("pitch: ", pitch[i]);
-    console.log(noteRows[parseInt(pitch[i])].children[startTime]);
 
-    var generatedColumn = noteRows[parseInt(pitch[i])].children[startTime];
-    generatedColumn.dataset.isGenerated = "true";
-    generatedColumn.dataset.isClicked = "true";
-    notesClicked.push(generatedColumn);
-    console.log(generatedColumn);
+    var rowPitch = document.querySelectorAll(`[data-row="` + pitch[i] + `"]`);
+    //console.log(rowPitch);
+    var columnPitch;
+    for(var j = 0; j < rowPitch.length; j++)
+    {
+      console.log("id: " + rowPitch[j].id);
+      console.log("startTime: " + startTime);
+      if(parseInt(rowPitch[j].id) == startTime)
+      {
+        columnPitch = rowPitch[j];
+        break;
+      }
+    }
+
+    console.log(columnPitch);
+    
+    columnPitch.dataset.isGenerated = "true";
+    columnPitch.dataset.isClicked = "true";
+    notesClicked.push(columnPitch);
 
     startTime++;
 
@@ -306,18 +323,18 @@ function play()
   var clickedNotes = document.querySelectorAll('[data-is-clicked="true"]');
   var maxColumn = 0;
 
-  console.log(clickedNotes);
+  //console.log(clickedNotes);
  
   for(var i = 0; i < clickedNotes.length; i++)
   {
     if(parseInt(clickedNotes[i].id) > maxColumn)
     {
       maxColumn = parseInt(clickedNotes[i].id);
-      console.log(maxColumn);
+      //console.log(maxColumn);
     }
   }
 
-  console.log(maxColumn);
+  //console.log(maxColumn);
 
   if(clickedNotes.length == 0) return;
 
@@ -363,7 +380,7 @@ function play()
       var row = parseInt(litUpColumn[i].getAttribute("data-row"));
 
       const audioObject = document.getElementById(notes[row - 24]);
-      console.log(audioObject);
+      //console.log(audioObject);
       const copy = audioObject.cloneNode(true);
       copy.classList.add("duplicate");
       

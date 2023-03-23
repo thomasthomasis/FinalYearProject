@@ -21,7 +21,7 @@ random.set_seed(seed)
 np.random.seed(seed)
 
 #loading model with up to date weights
-seq_length = 1
+seq_length = 10
 vocab_size = 128
 
 input_shape = (seq_length, 3)
@@ -111,6 +111,8 @@ def midi_to_notes(midi_file: str) -> pd.DataFrame:
 
 def create_array_of_generated_notes(jsonData, numNotes):
 
+  print(jsonData)
+
   pitch = jsonData['pitch']
   time = jsonData['time']
 
@@ -171,6 +173,4 @@ def create_array_of_generated_notes(jsonData, numNotes):
   print(pd.DataFrame(generated_notes, columns=(*key_order, 'start', 'end')))
 
   return generated_notes
-
-#create_array_of_generated_notes({"pitch":"[1,2,3,4,5]", "time":"[1,2,3,4,5]"}, 10)
 

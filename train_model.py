@@ -18,7 +18,7 @@ seed = 42
 random.set_seed(seed)
 np.random.seed(seed)
 
-data_dir = pathlib.Path('MIDI_files\data')
+data_dir = pathlib.Path('training_data')
 
 filenames = glob.glob(str(data_dir/'*.mid*'))
 print('Number of files:', len(filenames))
