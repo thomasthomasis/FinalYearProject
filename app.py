@@ -17,10 +17,6 @@ def generate_notes():
 
     return jsonify(returnedData)
 
-@app.route('/generatenotesget', methods=['GET'])
-def generate_notes_get():
-    print("yes")
-
 
 if __name__ == '__main__':
     app.run(debug=True)

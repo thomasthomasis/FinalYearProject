@@ -23,7 +23,7 @@ data_dir = pathlib.Path('training_data')
 filenames = glob.glob(str(data_dir/'*.mid*'))
 print('Number of files:', len(filenames))
 
-sample_file = filenames[1]
+sample_file = filenames[0]
 print(sample_file)
 
 pm = pretty_midi.PrettyMIDI(sample_file)

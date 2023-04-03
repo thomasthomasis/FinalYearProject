@@ -50,6 +50,7 @@ generateButton.addEventListener("click", () => {
 
 clearButton.addEventListener("click", () => {
   clear();
+  removeColumns();
 });
 
 playButton.addEventListener("click", () => {
@@ -148,19 +149,6 @@ const noteClicked = e => {
     notesActive++;
 
     var row = (parseInt(e.target.getAttribute("data-row")));
-
-    /*
-    const audioObject = document.getElementById(noteSounds[row - 24]);
-    const copy = audioObject.cloneNode(true);
-    copy.classList.add("duplicate");
-    
-    var audioDiv = document.querySelector(".audio-files");
-    audioDiv.appendChild(copy);
-    copy.play();
-    window.setInterval(() => {
-      copy.remove();
-    }, 3000)
-    */
 
     const audioObject = document.getElementById(noteSounds[row - 24]);
     //console.log(audioObject);
@@ -425,6 +413,22 @@ function addColumns(numColumns)
     }
 
     rowNumber = 127;
+  }
+}
+
+function removeColumns()
+{
+  var rows = document.querySelectorAll(".row");
+
+  var lastColumnId = document.querySelectorAll(".row")[0].children[document.querySelectorAll(".row")[0].children.length - 1].id;
+
+  while(lastColumnId != 40)
+  {
+    for(var i = 0; i < rows.length; i++)
+    {
+      rows[i].removeChild(rows[i].lastChild);
+    }
+    lastColumnId = document.querySelectorAll(".row")[0].children[document.querySelectorAll(".row")[0].children.length - 1].id;
   }
 }
 

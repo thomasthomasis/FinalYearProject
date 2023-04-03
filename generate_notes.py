@@ -108,7 +108,6 @@ def midi_to_notes(midi_file: str) -> pd.DataFrame:
   return pd.DataFrame({name: np.array(value) for name, value in notes.items()})
 
 
-
 def create_array_of_generated_notes(jsonData, numNotes):
 
   print(jsonData)

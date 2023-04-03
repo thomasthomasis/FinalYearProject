@@ -17,7 +17,7 @@
                 Hi, my name is Thomas and I am the developer of this website!!<br>This is the final year project for my degree in the University of Galway, Ireland.<br><br>
                 <img src="{{ url_for('static', filename='images/dev-img.jpeg') }}" class="dev" alt=""><br>
                 (this is me, not currently though)<br><br>
-                To use this website just click notes onto the piano roll and select how many notes you want to generate with the slider.<br> Then click the button with the big G on it. This will generate and add the new notes onto the piano roll.
+                To use this website just click notes onto the piano roll and select how many notes you want to generate with the slider.<br> Then click the button with the big G on it. This will generate and add the new notes onto the piano roll. (This process will work better if a single sequence of notes is used rather than chords).
                 <br><br>
                 You can clear notes using the red button.<br>
                 You can play the music if you hit the play button!!<br><br>
@@ -36,7 +36,7 @@
             <div class="info">i</div>
         </div>
 
-            <div class="audio-files">
+        <div class="audio-files">
             <audio id="a1" src="{{ url_for('static', filename='audio/a1.mp3') }}"></audio>
             <audio id="a2" src="{{ url_for('static', filename='audio/a2.mp3') }}"></audio>
             <audio id="a3" src="{{ url_for('static', filename='audio/a3.mp3') }}"></audio>
@@ -263,15 +263,15 @@
             </div>
             <div class="piano-roll">
                 <div class="row">
-                     <div class="column" id="1" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
-                     <div class="column" id="2" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
-                     <div class="column" id="3" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
-                     <div class="column" id="4" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
-                     <div class="column" id="5" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
-                     <div class="column" id="6" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
-                     <div class="column" id="7" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
-                     <div class="column" id="8" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
-                     <div class="column" id="9" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
+                    <div class="column" id="1" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
+                    <div class="column" id="2" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
+                    <div class="column" id="3" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
+                    <div class="column" id="4" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
+                    <div class="column" id="5" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
+                    <div class="column" id="6" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
+                    <div class="column" id="7" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
+                    <div class="column" id="8" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
+                    <div class="column" id="9" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
                     <div class="column" id="10" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
                     <div class="column" id="11" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
                     <div class="column" id="12" data-row="127" data-is-clicked="false" data-is-playing="false"></div>
